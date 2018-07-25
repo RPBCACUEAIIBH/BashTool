@@ -5,6 +5,7 @@ Error=false
 Done=false
 RandomNumber=""
 Mark=true
+OFile=""
 
 function IndentLines
 {
@@ -156,7 +157,7 @@ function HideLines
     then
       if [[ $LN -eq $FromLine && $Mark == true ]]
       then
-        echo "# $(( $ToLine - $FromLine + 1 )) line(s) hiddebn by BashTool! Marker: $RandomNumber" >> ${File}Temp
+        echo "# $(( $ToLine - $FromLine + 1 )) line(s) hiddebn by BashTool! Marker: $RandomNumber Your notes: (eg. specify what is hidden)" >> ${File}Temp
       fi
     else
       sed "${LN}q;d" $File >> ${File}Temp
@@ -172,18 +173,21 @@ function UnhideLines
 {
   if [[ $Marker == "all" ]]
   then
-    while [[ ! -z $(grep 'line(s) hiddebn by BashTool! Marker:' $File) ]]
+    while [[ ! -z $(grep "line(s) hiddebn by BashTool! Marker:" $File) ]]
     do
       LineCount
       LN=1
       touch ${File}Temp
       while [[ $LN -le $LC ]]
       do
-        if [[ ! -z $(sed "${LN}q;d" $File | grep 'line(s) hiddebn by BashTool! Marker:') ]]
+        if [[ ! -z $(sed "${LN}q;d" $File | grep "line(s) hiddebn by BashTool! Marker:") ]]
         then
           ThisMarker=$(sed "${LN}q;d" $File | awk '{ print $8 }')
           cat "./Hidden/Hidden$ThisMarker" >> "${File}Temp"
-          rm ./Hidden/Hidden$ThisMarker
+          if [[ -z "$OFile" ]]
+          then
+            rm ./Hidden/Hidden$ThisMarker
+          fi
         else
           sed "${LN}q;d" $File >> ${File}Temp
         fi
@@ -197,7 +201,7 @@ function UnhideLines
     touch ${File}Temp
     while [[ $LN -le $LC ]]
     do
-      if [[ ! -z $(sed "${LN}q;d" $File | grep 'line(s) hiddebn by BashTool! Marker:') ]]
+      if [[ ! -z $(sed "${LN}q;d" $File | grep "line(s) hiddebn by BashTool! Marker:") ]]
       then
         ThisMarker=$(sed "${LN}q;d" $File | awk '{ print $8 }')
         if [[ $ThisMarker -eq $Marker ]]
@@ -256,7 +260,8 @@ do
     echo "version - Shows current version."
     echo "help - Shows these options."
     echo "exit - Ends the loop..."
-    echo ""
+    echo "file - Change file"
+    echo "ofile - Optional output file (If an output file is specified running the unhide command without a marker specified will compile the script into the output file, and leave the original and it's parts intact.)"
   fi
   if [[ $Answer == "ql" ]]
   then
@@ -294,7 +299,16 @@ do
         "unhide" ) if [[ -z $(echo $Answer | awk '{ print $2 }') || $(echo $Answer | awk '{ print $2 }') == "all" ]]
                    then
                      Marker="all"
-                     UnhideLines
+                     if [[ ! -z "$OFile" ]]
+                     then
+                       cp -f "$File" "$OFile"
+                       TFile="$File"
+                       File="$OFile"
+                       UnhideLines
+                       File="$TFile"
+                     else
+                       UnhideLines
+                     fi
                    else
                      Marker=$(echo $Answer | awk '{ print $2 }')
                      if [[ $Marker -gt -1 ]]
@@ -303,7 +317,7 @@ do
                      fi
                    fi
                    ;;
-          "File" ) Done=false
+          "file" ) Done=false
                    while [[ $Done == false ]]
                    do
                      read -p 'Please specify the file you want to work with or type "cancel" not to change anything!: ' X
@@ -314,6 +328,21 @@ do
                          File="$X"
                          Done=true
                          echo "$File Selected!"
+                       fi
+                     fi
+                   done
+                   ;;
+         "ofile" ) Done=false
+                   while [[ $Done == false ]]
+                   do
+                     read -p 'Please specify the file you want to work with or type "cancel" not to change anything!: ' X
+                     if [[ -f "$X" || $X == "cancel" || -z $X ]]
+                     then
+                       if [[ $X != "cancel" ]]
+                       then
+                         OFile="$X"
+                         Done=true
+                         echo "$OFile Selected!"
                        fi
                      fi
                    done
@@ -337,7 +366,6 @@ do
                      echo '  :' >> $File
                      DoIndent
                      echo 'fi' >> $File
-                     echo "# X line(s) hiddebn by BashTool! Marker: $RandomNumber" >> $File
                      Reassemble
                    fi
                    ;;
@@ -364,7 +392,6 @@ do
                      echo '  :' >> $File
                      DoIndent
                      echo 'fi' >> $File
-                     echo "# X line(s) hiddebn by BashTool! Marker: $RandomNumber" >> $File
                      Reassemble
                    fi
                    ;;
@@ -387,7 +414,6 @@ do
                      echo '  :' >> $File
                      DoIndent
                      echo 'done' >> $File
-                     echo "# X line(s) hiddebn by BashTool! Marker: $RandomNumber" >> $File
                      Reassemble
                    fi
                    ;;
@@ -412,7 +438,6 @@ do
                      echo '# X=$(( $X + 1 ))' >> $File
                      DoIndent
                      echo 'done' >> $File
-                     echo "# X line(s) hiddebn by BashTool! Marker: $RandomNumber" >> $File
                      Reassemble
                    fi
                    ;;
@@ -439,7 +464,6 @@ do
                      echo '               ;;' >> $File
                      DoIndent
                      echo 'esac' >> $File
-                     echo "# X line(s) hiddebn by BashTool! Marker: $RandomNumber" >> $File
                      Reassemble
                    fi
                    ;;
@@ -462,7 +486,6 @@ do
                      echo '  :' >> $File
                      DoIndent
                      echo '}' >> $File
-                     echo "# X line(s) hiddebn by BashTool! Marker: $RandomNumber" >> $File
                      Reassemble
                    fi
                    ;;
