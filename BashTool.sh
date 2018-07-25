@@ -90,6 +90,21 @@ function LineCount
 
 function Disassemble
 {
+  if [[ $(echo $(sed "${AtLine}q;d" $File | grep ":")) == ":" ]] # Just a nice touch... if the entire $AtLine line only contains a single ":" it will be removed, as it's only a no op command used to avoid errors...
+  then
+    LineCount
+    touch ${File}Temp
+    LN=1
+    while [[ $LN -le $LC ]]
+    do
+      if [[ $LN -ne $AtLine ]]
+      then
+        sed "${LN}q;d" $File >> ${File}Temp
+      fi
+      LN=$(( $LN + 1 ))
+    done
+    mv ${File}Temp ${File}
+  fi
   FromLine=$AtLine
   LineCount
   ToLine=$LC
@@ -100,7 +115,7 @@ function Disassemble
 function Reassemble
 {
   Marker=$RandomNumber
-  Unhide
+  UnhideLines
   Mark=true
 }
 
@@ -139,12 +154,9 @@ function HideLines
   do
     if [[ $LN -ge $FromLine && $LN -le $ToLine ]]
     then
-      if [[ $LN -eq $FromLine ]]
+      if [[ $LN -eq $FromLine && $Mark == true ]]
       then
-        if [[ $Mark == true ]]
-        then
-          echo "# $(( $ToLine - $FromLine + 1 )) line(s) hiddebn by BashTool! Marker: $RandomNumber" >> ${File}Temp
-        fi
+        echo "# $(( $ToLine - $FromLine + 1 )) line(s) hiddebn by BashTool! Marker: $RandomNumber" >> ${File}Temp
       fi
     else
       sed "${LN}q;d" $File >> ${File}Temp
@@ -156,7 +168,7 @@ function HideLines
   ToLine=""
 }
 
-function Unhide
+function UnhideLines
 {
   if [[ $Marker == "all" ]]
   then
@@ -190,7 +202,7 @@ function Unhide
         ThisMarker=$(sed "${LN}q;d" $File | awk '{ print $8 }')
         if [[ $ThisMarker -eq $Marker ]]
         then
-          cat ./Hidden/Hidden$ThisMarker >> "${File}Temp"
+          cat ./Hidden/Hidden$ThisMarker >> ${File}Temp
           rm ./Hidden/Hidden$ThisMarker
         else
           sed "${LN}q;d" $File >> ${File}Temp
@@ -253,11 +265,11 @@ do
   fi
   if [[ $Answer == "templates" ]]
   then
-    echo "Sorry! ...not implemented yet."
-    echo ""
-    echo "Soon to be available templates: "
-    echo "- Bare minimum"
-    echo "- Interactive (Like this tool... it can be useful for controling another script by changing variables in files...)"
+    echo "BMIN - Bare minimum template..."
+    echo "DIRBT - Directory backtracking template (Finds it's own directory no matter where it is called. You can simply use ./filename to point to another file from the directory where the script is.)"
+    echo "INTER - Interactive template (like this one. It's useful for controlling another scipt by editing variables in config files.)"
+    echo "MTT - Multi threaded template (Capable of detecting preparing, starting and controlling multiple simultaneous tasks to use all CPU cores. Additionally it also checks for root user and sets high priority if runs as root to maximize efficiency...)"
+    echo "- Interactive (Like this tool... it can be useful for controling another script by changing variables in control files...)"
     echo "- MultiThreaded (An advanced template that detects cpu cores and user, launches and manages threads, and if it's running as root it also sets task priority for higher efficiency.)"
     echo ""
   fi
@@ -267,7 +279,7 @@ do
           "hide" ) FromLine=$(echo $Answer | awk '{ print $2 }')
                    ToLine=$(echo $Answer | awk '{ print $3 }')
                    LineCount
-                   if [[ $FromLine -gt 0 && $FromLine -le $LC ]]
+                   if [[ -z $FromLine || $FromLine -gt 0 && $FromLine -le $LC ]]
                    then
                      if [[ -z $ToLine || $ToLine -gt $FromLine && $ToLine -le $LC ]]
                      then
@@ -282,12 +294,12 @@ do
         "unhide" ) if [[ -z $(echo $Answer | awk '{ print $2 }') || $(echo $Answer | awk '{ print $2 }') == "all" ]]
                    then
                      Marker="all"
-                     Unhide
+                     UnhideLines
                    else
                      Marker=$(echo $Answer | awk '{ print $2 }')
                      if [[ $Marker -gt -1 ]]
                      then
-                       Unhide
+                       UnhideLines
                      fi
                    fi
                    ;;
@@ -504,6 +516,14 @@ do
                        IndentLines
                      fi
                    fi
+                   ;;
+         "DIRBT" ) cp -f ./Templates/Backtracking.sh $File
+                   ;;
+           "INT" ) cp -f ./Templates/Interactive.sh $File
+                   ;;
+          "BMIN" ) cp -f ./Templates/BareMinimum.sh $File
+                   ;;
+           "MTT" ) cp -f ./Templates/MultiThreaded.sh $File
                    ;;
             "ql" ) :
                    ;;
