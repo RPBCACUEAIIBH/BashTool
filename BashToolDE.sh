@@ -157,7 +157,7 @@ function Disassemble
 
 function Reassemble
 {
-  echo "# X line(s) hiddebn by BashTool! Marker: $RandomNumber" >> "$File"
+  echo "# X line(s) hiddebn by BashToolDE! Marker: $RandomNumber" >> "$File"
   Marker=$RandomNumber
   UnhideLines
   Mark=true
@@ -200,7 +200,7 @@ function HideLines
     then
       if [[ $LN -eq $FromLine && $Mark == true ]]
       then
-        echo "# $(( $ToLine - $FromLine + 1 )) line(s) hiddebn by BashTool! Marker: $RandomNumber Your notes: (eg. specify what is hidden)" >> "${File}Temp"
+        echo "# $(( $ToLine - $FromLine + 1 )) line(s) hiddebn by BashToolDE! Marker: $RandomNumber Your notes: (eg. specify what is hidden)" >> "${File}Temp"
       fi
     else
       sed "${LN}q;d" "$File" >> "${File}Temp"
@@ -217,14 +217,14 @@ function UnhideLines
 {
   if [[ $Marker == "all" ]]
   then
-    while [[ ! -z $(grep "line(s) hiddebn by BashTool! Marker:" "$File") ]]
+    while [[ ! -z $(grep "line(s) hiddebn by BashToolDE! Marker:" "$File") ]]
     do
       LineCount
       LN=1
       touch "${File}Temp"
       while [[ $LN -le $LC ]]
       do
-        if [[ ! -z $(sed "${LN}q;d" "$File" | grep "line(s) hiddebn by BashTool! Marker:") ]]
+        if [[ ! -z $(sed "${LN}q;d" "$File" | grep "line(s) hiddebn by BashToolDE! Marker:") ]]
         then
           ThisMarker=$(sed "${LN}q;d" "$File" | awk '{ print $8 }')
           cat "$OwnDir/Hidden/Hidden$ThisMarker" >> "${File}Temp"
@@ -246,7 +246,7 @@ function UnhideLines
     touch "${File}Temp"
     while [[ $LN -le $LC ]]
     do
-      if [[ ! -z $(sed "${LN}q;d" "$File" | grep "line(s) hiddebn by BashTool! Marker:") ]]
+      if [[ ! -z $(sed "${LN}q;d" "$File" | grep "line(s) hiddebn by BashToolDE! Marker:") ]]
       then
         ThisMarker=$(sed "${LN}q;d" "$File" | awk '{ print $8 }')
         if [[ $ThisMarker -eq $Marker ]]

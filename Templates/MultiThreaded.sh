@@ -8,26 +8,8 @@ OwnDir="$(pwd)" # Saving path to own directory path.
 # Another good practice is usin "$OwnDir/filename" instead of $OwnDir/filename everywhere to specify a file, cause using quotation marks everywhere kinda gets rid of the space in file name or path problems... Like so: echo "string" >> "$/home/user/Directory with space in the name/file name" # <-- Mind the space in the file name and path! (...kinda hard to get used to using "" once you got used to not using them. :/ ...from experience. Wildcards in names and path will still be a problem even with "", however less likely to encounter wildcard then spaces.)
 
 # Variables
-Answer=""
 
 # Functions
 
 # Execution
-while [[ $Answer != "exit" ]]
-do
-  case $Answer # Messages that need to be displayed shold be here, with ":" (no operation) command in the bottom case statement...
-  in
-               "" ) :
-                    ;;
-           "help" ) echo "help - Shows accepted options."
-                    echo "exit - Exits the interactive terminal."
-                    echo ""
-                    ;;
-                 *) echo "Error: $Answer is an unknown command!"
-                    Error=false
-                    ;;
-  esac
-  read -p 'Type "help" to list options. Waiting for orders: ' Answer
-  Status=$(cat ./Controls | grep Status | awk '{ print $2 }')
-  clear
-done
+
