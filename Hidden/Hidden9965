@@ -1,0 +1,188 @@
+           "file" ) Done=false
+                    while [[ $Done == false ]]
+                    do
+                      read -p 'Please specify the file you want to work with or type "cancel" not to change anything!: ' X
+                      if [[ -f "$X" || $X == "cancel" ]]
+                      then
+                        if [[ $X != "cancel" ]]
+                        then
+                          File="$X"
+                          Done=true
+                          echo "Editing: $File"
+                        fi
+                      fi
+                    done
+                    ;;
+          "ofile" ) Done=false
+                    while [[ $Done == false ]]
+                    do
+                      read -p 'Please specify the file you want to work with or type "cancel" not to change anything!: ' X
+                      if [[ -f "$X" || $X == "cancel" || -z $X ]]
+                      then
+                        if [[ $X != "cancel" ]]
+                        then
+                          OFile="$X"
+                          Done=true
+                          echo "Output File: $OFile"
+                          if [[ ! -z "$OFile" ]]
+                          then
+                            echo "The unhide command with no argument will now use this file to re-build the file instead of the original. (You can undo this with ofile command, and no file specified...)"
+                            echo ""
+                          else
+                            echo "The unhide command with no argument will now reconstruct the original."
+                            echo ""
+                          fi
+                        fi
+                      fi
+                    done
+                     ;;
+           "hide" ) FromLine=$(echo $Answer | awk '{ print $2 }')
+                    ToLine=$(echo $Answer | awk '{ print $3 }')
+                    LineCount
+                    if [[ -z $FromLine || $FromLine -gt 0 && $FromLine -le $LC ]]
+                    then
+                      if [[ -z $ToLine || $ToLine -gt $FromLine && $ToLine -le $LC ]]
+                      then
+                        if [[ -z $ToLine ]]
+                        then
+                          ToLine=$FromLine
+                        fi
+                        HideLines
+                      fi
+                    fi
+                    ;;
+         "unhide" ) if [[ -z $(echo $Answer | awk '{ print $2 }') || $(echo $Answer | awk '{ print $2 }') == "all" ]]
+                    then
+                      Marker="all"
+                      if [[ ! -z "$OFile" ]]
+                      then
+                        cp -af "$File" "$OFile"
+                        KeepFlag=true
+                        TFile="$File"
+                        File="$OFile"
+                        UnhideLines
+                        File="$TFile"
+                        KeepFlag=false
+                      else
+                        UnhideLines
+                      fi
+                    else
+                      Marker=$(echo $Answer | awk '{ print $2 }')
+                      if [[ $Marker -gt -1 ]]
+                      then
+                        UnhideLines
+                      fi
+                    fi
+                    ;;
+        "comment" ) FromLine=$(echo $Answer | awk '{ print $2 }')
+                    ToLine=$(echo $Answer | awk '{ print $3 }')
+                    LineCount
+                    if [[ $FromLine -gt 0 && $FromLine -le $LC ]]
+                    then
+                      if [[ -z $ToLine || $ToLine -gt $FromLine && $ToLine -le $LC ]]
+                      then
+                        if [[ -z $ToLine ]]
+                        then
+                          ToLine=$FromLine
+                        fi
+                        CommentLines
+                      fi
+                    fi
+                    ;;
+      "uncomment" ) FromLine=$(echo $Answer | awk '{ print $2 }')
+                    ToLine=$(echo $Answer | awk '{ print $3 }')
+                    LineCount
+                    if [[ $FromLine -gt 0 && $FromLine -le $LC ]]
+                    then
+                      if [[ -z $ToLine || $ToLine -gt $FromLine && $ToLine -le $LC ]]
+                      then
+                        if [[ -z $ToLine ]]
+                        then
+                          ToLine=$FromLine
+                        fi
+                        UncommentLines
+                      fi
+                    fi
+                    ;;
+         "indent" ) FromLine=$(echo $Answer | awk '{ print $2 }')
+                    ToLine=$(echo $Answer | awk '{ print $3 }')
+                    LineCount
+                    if [[ $FromLine -gt 0 && $FromLine -le $LC ]]
+                    then
+                      if [[ -z $ToLine || $ToLine -gt $FromLine && $ToLine -le $LC ]]
+                      then
+                        if [[ -z $ToLine ]]
+                        then
+                          ToLine=$FromLine
+                        fi
+                        if [[ ! -z $(echo $Answer | awk '{ print $4 }') && $(echo $Answer | awk '{ print $4 }') -gt 0 ]]
+                        then
+                          Indent=$(echo $Answer | awk '{ print $4 }')
+                        else
+                          Indent=0
+                        fi
+                        IndentLines
+                      fi
+                    fi
+                    ;;
+       "unindent" ) FromLine=$(echo $Answer | awk '{ print $2 }')
+                    ToLine=$(echo $Answer | awk '{ print $3 }')
+                    LineCount
+                    if [[ $FromLine -gt 0 && $FromLine -le $LC ]]
+                    then
+                      if [[ -z $ToLine || $ToLine -gt $FromLine && $ToLine -le $LC ]]
+                      then
+                        if [[ -z $ToLine ]]
+                        then
+                          ToLine=$FromLine
+                        fi
+                        if [[ ! -z $(echo $Answer | awk '{ print $4 }') && $(echo $Answer | awk '{ print $4 }') -gt 0 ]]
+                        then
+                          Indent=$(echo $Answer | awk '{ print $4 }')
+                        else
+                          Indent=0
+                        fi
+                        UnindentLines
+                      fi
+                    fi
+                    ;;
+           "mark" ) FromLine=$(echo $Answer | awk '{ print $2 }')
+                    ToLine=$(echo $Answer | awk '{ print $3 }')
+                    LineCount
+                    if [[ $FromLine -gt 0 && $FromLine -le $LC ]]
+                    then
+                      if [[ -z $ToLine || $ToLine -gt $FromLine && $ToLine -le $LC ]]
+                      then
+                        if [[ -z $ToLine ]]
+                        then
+                          ToLine=$FromLine
+                        fi
+                        MarkLines
+                      fi
+                    fi
+                    ;;
+         "unmark" ) FromLine=$(echo $Answer | awk '{ print $2 }')
+                    ToLine=$(echo $Answer | awk '{ print $3 }')
+                    LineCount
+                    if [[ $FromLine -gt 0 && $FromLine -le $LC ]]
+                    then
+                      if [[ -z $ToLine || $ToLine -gt $FromLine && $ToLine -le $LC ]]
+                      then
+                        if [[ -z $ToLine ]]
+                        then
+                          ToLine=$FromLine
+                        fi
+                        UnmarkLines
+                      fi
+                    fi
+                    ;;
+        "cleanup" ) Cleanup
+                    ;;
+            "MIN" ) cp -af "$OwnDir/Templates/Minimalistic.sh" "$File"
+                    ;;
+          "INTER" ) cp -af "$OwnDir/Templates/Interactive.sh" "$File"
+                    ;;
+#            "MTT" ) cp -af "$OwnDir/Templates/MultiThreaded.sh" "$File"
+#                    ;;
+        "version" ) echo "Version $Version"
+                    ;;

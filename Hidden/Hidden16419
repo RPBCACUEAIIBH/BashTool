@@ -1,0 +1,9 @@
+FirstStart=false # Keep this in line 10
+Version="1.0"
+File="$@"
+Answer=""
+Done=false
+RandomNumber=""
+Mark=true
+OFile=""
+KeepFlag=false

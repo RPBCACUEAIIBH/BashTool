@@ -1,0 +1,281 @@
+function MarkLines
+{
+  LineCount
+  touch "${File}Temp"
+  LN=1
+  while [[ $LN -le $LC ]]
+  do
+    if [[ $LN -ge $FromLine && $LN -le $ToLine ]]
+    then
+      LineContent=$(sed "${LN}q;d" "$File")
+      echo -n "$LineContent" >> "${File}Temp"
+      echo " # DMark" >> "${File}Temp"
+    else
+      sed "${LN}q;d" "$File" >> "${File}Temp"
+    fi
+    LN=$(( $LN + 1 ))
+  done
+  cp -f "${File}Temp" "$File"
+  rm "${File}Temp"
+  FromLine=""
+  ToLine=""
+}
+
+function UnmarkLines
+{
+  LineCount
+  touch "${File}Temp"
+  LN=1
+  while [[ $LN -le $LC ]]
+  do
+    if [[ $LN -ge $FromLine && $LN -le $ToLine ]]
+    then
+      LineContent=$(sed "${LN}q;d" "$File")
+      NewContent=""
+      for i in $(seq 0 100000)
+      do
+        if [[ "${LineContent:$i:8}" != " # Debug" && "${LineContent:$i:8}" != " # DMark" ]]
+        then
+          NewContent="$NewContent${LineContent:$i:1}"
+        else
+          break
+        fi
+      done
+      echo "$NewContent" >> "${File}Temp"
+    else
+      sed "${LN}q;d" "$File" >> "${File}Temp"
+    fi
+    LN=$(( $LN + 1 ))
+  done
+  cp -f "${File}Temp" "$File"
+  rm "${File}Temp"
+  FromLine=""
+  ToLine=""
+}
+
+function Cleanup
+{
+  LineCount
+  touch "${File}Temp"
+  LN=1
+  while [[ $LN -le $LC ]]
+  do
+    if [[ -z $(sed "${LN}q;d" "$File" | grep "# Debug") && -z $(sed "${LN}q;d" "$File" | grep "# DMark") ]]
+    then
+      sed "${LN}q;d" "$File" >> "${File}Temp"
+    fi
+    LN=$(( $LN + 1 ))
+  done
+  cp -f "${File}Temp" "$File"
+  rm "${File}Temp"
+  FromLine=""
+  ToLine=""
+}
+
+function UnindentLines
+{
+  LineCount
+  touch "${File}Temp"
+  LN=1
+  while [[ $LN -le $LC ]]
+  do
+    if [[ $LN -ge $FromLine && $LN -le $ToLine ]]
+    then
+      X=0
+      LineContent=$(sed "${LN}q;d" "$File")
+      while [[ $X -lt $(( $Indent * 2 )) ]]
+      do
+        LineContent="${LineContent:1:10000}"
+        X=$(( $X + 1 ))
+      done
+      echo "$LineContent" >> "${File}Temp"
+    else
+      sed "${LN}q;d" "$File" >> "${File}Temp"
+    fi
+    LN=$(( $LN + 1 ))
+  done
+  cp -f "${File}Temp" "$File"
+  rm "${File}Temp"
+  FromLine=""
+  ToLine=""
+}
+
+function IndentLines
+{
+  LineCount
+  touch "${File}Temp"
+  LN=1
+  while [[ $LN -le $LC ]]
+  do
+    if [[ $LN -ge $FromLine && $LN -le $ToLine ]]
+    then
+      X=0
+      while [[ $X -lt $Indent ]]
+      do
+        echo -n "  " >> "${File}Temp"
+        X=$(( $X + 1 ))
+      done
+      sed "${LN}q;d" "$File" >> "${File}Temp"
+    else
+      sed "${LN}q;d" "$File" >> "${File}Temp"
+    fi
+    LN=$(( $LN + 1 ))
+  done
+  cp -f "${File}Temp" "$File"
+  rm "${File}Temp"
+  FromLine=""
+  ToLine=""
+}
+
+function CommentLines
+{
+  LineCount
+  touch "${File}Temp"
+  LN=1
+  while [[ $LN -le $LC ]]
+  do
+    if [[ $LN -ge $FromLine && $LN -le $ToLine ]]
+    then
+      echo -n "#" >> "${File}Temp"
+      sed "${LN}q;d" "$File" >> "${File}Temp"
+    else
+      sed "${LN}q;d" "$File" >> "${File}Temp"
+    fi
+    LN=$(( $LN + 1 ))
+  done
+  cp -f "${File}Temp" "$File"
+  rm "${File}Temp"
+  FromLine=""
+  ToLine=""
+}
+
+function UncommentLines
+{
+  LineCount
+  touch "${File}Temp"
+  LN=1
+  while [[ $LN -le $LC ]]
+  do
+    if [[ $LN -ge $FromLine && $LN -le $ToLine ]]
+    then
+      LineContent=$(sed "${LN}q;d" "$File")
+      if [[ ${LineContent:0:1} == "#" ]]
+      then
+        echo "${LineContent:1:100000}" >> "${File}Temp"
+      else
+        echo "$LineContent" >> "${File}Temp"
+      fi
+    else
+      sed "${LN}q;d" "$File" >> "${File}Temp"
+    fi
+    LN=$(( $LN + 1 ))
+  done
+  cp -f "${File}Temp" "$File"
+  rm "${File}Temp"
+  FromLine=""
+  ToLine=""
+}
+
+function DoIndent
+{
+  X=0
+  while [[ $X -lt $Indent ]]
+  do
+    echo -n "  " >> "$File"
+    X=$(( $X + 1 ))
+  done
+}
+
+function HideLines
+{
+  RandomSelection=true
+  while [[ $RandomSelection == true ]]
+  do
+    RandomNumber=$RANDOM
+    if [[ ! -e "$OwnDir/Hidden/Hidden$RandomNumber" ]]
+    then
+      RandomSelection=false
+    fi
+  done
+  touch "$OwnDir/Hidden/Hidden$RandomNumber"
+  LN=$FromLine
+  while [[ $LN -le $ToLine ]]
+  do
+    sed "${LN}q;d" "$File" >> "$OwnDir/Hidden/Hidden$RandomNumber"
+    LN=$(( $LN + 1 ))
+  done
+  LineCount
+  touch "${File}Temp"
+  LN=1
+  while [[ $LN -le $LC ]]
+  do
+    if [[ $LN -ge $FromLine && $LN -le $ToLine ]]
+    then
+      if [[ $LN -eq $FromLine && $Mark == true ]]
+      then
+        echo "# $(( $ToLine - $FromLine + 1 )) line(s) hiddebn by BashTool! Marker: $RandomNumber Your notes: (eg. specify what is hidden)" >> "${File}Temp"
+      fi
+    else
+      sed "${LN}q;d" "$File" >> "${File}Temp"
+    fi
+    LN=$(( $LN + 1 ))
+  done
+  cp -f "${File}Temp" "$File"
+  rm "${File}Temp"
+  FromLine=""
+  ToLine=""
+}
+
+function UnhideLines
+{
+  if [[ $Marker == "all" ]]
+  then
+    while [[ ! -z $(grep "line(s) hiddebn by BashTool! Marker:" "$File") ]]
+    do
+      LineCount
+      LN=1
+      touch "${File}Temp"
+      while [[ $LN -le $LC ]]
+      do
+        if [[ ! -z $(sed "${LN}q;d" "$File" | grep "line(s) hiddebn by BashTool! Marker:") ]]
+        then
+          ThisMarker=$(sed "${LN}q;d" "$File" | awk '{ print $8 }')
+          cat "$OwnDir/Hidden/Hidden$ThisMarker" >> "${File}Temp"
+          if [[ $KeepFlag == false ]]
+          then
+            rm "$OwnDir/Hidden/Hidden$ThisMarker"
+          fi
+        else
+          sed "${LN}q;d" "$File" >> "${File}Temp"
+        fi
+        LN=$(( $LN + 1 ))
+      done
+      cp -f "${File}Temp" "$File"
+      rm "${File}Temp"
+    done
+  else
+    LineCount
+    LN=1
+    touch "${File}Temp"
+    while [[ $LN -le $LC ]]
+    do
+      if [[ ! -z $(sed "${LN}q;d" "$File" | grep "line(s) hiddebn by BashTool! Marker:") ]]
+      then
+        ThisMarker=$(sed "${LN}q;d" "$File" | awk '{ print $8 }')
+        if [[ $ThisMarker -eq $Marker ]]
+        then
+          cat "$OwnDir/Hidden/Hidden$ThisMarker" >> "${File}Temp"
+          rm "$OwnDir/Hidden/Hidden$ThisMarker"
+        else
+          sed "${LN}q;d" "$File" >> "${File}Temp"
+        fi
+      else
+        sed "${LN}q;d" "$File" >> "${File}Temp"
+      fi
+      LN=$(( $LN + 1 ))
+    done
+    cp -f "${File}Temp" "$File"
+    rm "${File}Temp"
+  fi
+  Marker=""
+}

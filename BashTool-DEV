@@ -1,0 +1,28 @@
+#! /bin/bash
+
+# Finding roots
+# 4 line(s) hiddebn by BashToolDE! Marker: 26184 Your notes: Finding roots
+
+# Variables
+# 9 line(s) hiddebn by BashToolDE! Marker: 16419 Your notes: Variables
+
+# Functions
+# 8 line(s) hiddebn by BashToolDE! Marker: 4178 Your notes: Common function
+# 55 line(s) hiddebn by BashToolDE! Marker: 8084 Your notes: Insertion functions
+# 281 line(s) hiddebn by BashToolDE! Marker: 565 Your notes: Editing functions
+
+# Execution
+# 27 line(s) hiddebn by BashToolDE! Marker: 24844 Your notes: Initializaton
+while [[ $Answer != "exit" ]]
+do
+  case $(echo $Answer | awk '{ print $1 }')
+  in
+# 182 line(s) hiddebn by BashToolDE! Marker: 26151 Your notes: Insertion commands
+# 326 line(s) hiddebn by BashToolDE! Marker: 13441 Your notes: QL
+# 188 line(s) hiddebn by BashToolDE! Marker: 9965 Your notes: Editing commands
+# 72 line(s) hiddebn by BashToolDE! Marker: 3245 Your notes: Help
+  esac
+  read -p 'Type "help" to list options. Waiting for orders: ' Answer
+  clear
+done
+echo "Bye! :)"

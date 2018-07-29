@@ -54,7 +54,7 @@ function Disassemble
 
 function Reassemble
 {
-  echo "# X line(s) hiddebn by BashTool! Marker: $RandomNumber" >> "$File"
+  echo "# X line(s) hiddebn by BashToolDE! Marker: $RandomNumber" >> "$File"
   Marker=$RandomNumber
   UnhideLines
   Mark=true
@@ -67,15 +67,15 @@ function CountDM
     DebugNum=$(( $DebugNum + 1 ))
   done
   X=true
-  for i in $(grep "line(s) hiddebn by BashTool! Marker:" "$File" | awk '{ print $8 }' )
+  for i in $(grep "line(s) hiddebn by BashToolDE! Marker:" "$File" | awk '{ print $8 }' )
   do
     for n in $(grep "# Debug" "$OwnDir/Hidden/Hidden$i" | awk '{ print $1 }')
     do
       DebugNum=$(( $DebugNum + 1 ))
     done
-    if [[ ! -z $(grep "line(s) hiddebn by BashTool! Marker:" "$OwnDir/Hidden/Hidden$i") && $X == true ]]
+    if [[ ! -z $(grep "line(s) hiddebn by BashToolDE! Marker:" "$OwnDir/Hidden/Hidden$i") && $X == true ]]
     then
-      echo "Warning: BashTool detected more then 1 level of hidden lines. Debug messages are only counted 1 level deep. Keep in mind that you may have debug message with this numer in more then 1 location in your code!"
+      echo "Warning: BashToolDE detected more then 1 level of hidden lines. Debug messages are only counted 1 level deep. Keep in mind that you may have debug message with this numer in more then 1 location in your code!"
       X=false
     fi
   done
@@ -297,7 +297,7 @@ function HideLines
     then
       if [[ $LN -eq $FromLine && $Mark == true ]]
       then
-        echo "# $(( $ToLine - $FromLine + 1 )) line(s) hiddebn by BashTool! Marker: $RandomNumber Your notes: (eg. specify what is hidden)" >> "${File}Temp"
+        echo "# $(( $ToLine - $FromLine + 1 )) line(s) hiddebn by BashToolDE! Marker: $RandomNumber Your notes: (eg. specify what is hidden)" >> "${File}Temp"
       fi
     else
       sed "${LN}q;d" "$File" >> "${File}Temp"
@@ -314,14 +314,14 @@ function UnhideLines
 {
   if [[ $Marker == "all" ]]
   then
-    while [[ ! -z $(grep "line(s) hiddebn by BashTool! Marker:" "$File") ]]
+    while [[ ! -z $(grep "line(s) hiddebn by BashToolDE! Marker:" "$File") ]]
     do
       LineCount
       LN=1
       touch "${File}Temp"
       while [[ $LN -le $LC ]]
       do
-        if [[ ! -z $(sed "${LN}q;d" "$File" | grep "line(s) hiddebn by BashTool! Marker:") ]]
+        if [[ ! -z $(sed "${LN}q;d" "$File" | grep "line(s) hiddebn by BashToolDE! Marker:") ]]
         then
           ThisMarker=$(sed "${LN}q;d" "$File" | awk '{ print $8 }')
           cat "$OwnDir/Hidden/Hidden$ThisMarker" >> "${File}Temp"
@@ -365,18 +365,18 @@ function UnhideLines
 }
 
 # Execution
-if [[ $FirstStart == true && -z $(grep "bashtool" ~/.bashrc) ]]
+if [[ $FirstStart == true && -z $(grep "bashtoolde" ~/.bashrc) ]]
 then
-  read -p 'Wold you like BashTool to set an alias for itself? (y/n): ' Yy
+  read -p 'Wold you like BashToolDE to set an alias for itself? (y/n): ' Yy
   if [[ $Yy == [Yy]* ]]
   then
     echo "" >> ~/.bashrc
-    echo "# BashTool entry" >> ~/.bashrc
-    echo "alias bashtool=\"$OwnDir/BashTool.sh\"" >> ~/.bashrc
-    echo 'You can now run BashTool by typing "bashtool". (You may need to re-open the terminal.)'
-    sed -i "10s/FirstStart=true/FirstStart=false/" "$OwnDir/BashTool.sh"
+    echo "# BashToolDE entry" >> ~/.bashrc
+    echo "alias bashtoolde=\"$OwnDir/BashToolDE.sh\"" >> ~/.bashrc
+    echo 'You can now run BashToolDE by typing "bashtoolde". (You may need to re-open the terminal.)'
+    sed -i "10s/FirstStart=true/FirstStart=false/" "$OwnDir/BashToolDE.sh"
   else
-    sed -i "10s/FirstStart=true/FirstStart=false/" "$OwnDir/BashTool.sh"
+    sed -i "10s/FirstStart=true/FirstStart=false/" "$OwnDir/BashToolDE.sh"
   fi
 fi
 if [[ -f "$File" ]]

@@ -1,0 +1,55 @@
+function Disassemble
+{
+  if [[ $(echo $(sed "${AtLine}q;d" "$File" | grep ":")) == ":" ]] # Just a nice touch... if the entire $AtLine line only contains a single ":" it will be removed, as it's only a no op command used to avoid errors...
+  then
+    LineCount
+    touch "${File}Temp"
+    LN=1
+    while [[ $LN -le $LC ]]
+    do
+      if [[ $LN -ne $AtLine ]]
+      then
+        sed "${LN}q;d" "$File" >> "${File}Temp"
+      fi
+      LN=$(( $LN + 1 ))
+    done
+    cp -f "${File}Temp" "$File"
+    rm "${File}Temp"
+  fi
+  FromLine=$AtLine
+  LineCount
+  ToLine=$LC
+  Mark=false
+  HideLines
+}
+
+function Reassemble
+{
+  echo "# X line(s) hiddebn by BashTool! Marker: $RandomNumber" >> "$File"
+  Marker=$RandomNumber
+  UnhideLines
+  Mark=true
+}
+
+function CountDM
+{
+  for i in $(grep "# Debug" "$File" | awk '{ print $1 }')
+  do
+    DebugNum=$(( $DebugNum + 1 ))
+  done
+  X=true
+  for i in $(grep "line(s) hiddebn by BashTool! Marker:" "$File" | awk '{ print $8 }' )
+  do
+    for n in $(grep "# Debug" "$OwnDir/Hidden/Hidden$i" | awk '{ print $1 }')
+    do
+      DebugNum=$(( $DebugNum + 1 ))
+    done
+    if [[ ! -z $(grep "line(s) hiddebn by BashTool! Marker:" "$OwnDir/Hidden/Hidden$i") && $X == true ]]
+    then
+      echo "Warning: BashTool detected more then 1 level of hidden lines. Debug messages are only counted 1 level deep. Keep in mind that you may have debug message with this numer in more then 1 location in your code!"
+      X=false
+    fi
+  done
+  DebugNum=$(( $DebugNum + 1 ))
+}
+

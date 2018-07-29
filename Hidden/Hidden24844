@@ -1,0 +1,27 @@
+if [[ $FirstStart == true && -z $(grep "bashtool" ~/.bashrc) ]]
+then
+  read -p 'Wold you like BashTool to set an alias for itself? (y/n): ' Yy
+  if [[ $Yy == [Yy]* ]]
+  then
+    echo "" >> ~/.bashrc
+    echo "# BashTool entry" >> ~/.bashrc
+    echo "alias bashtool=\"$OwnDir/BashTool.sh\"" >> ~/.bashrc
+    echo 'You can now run BashTool by typing "bashtool". (You may need to re-open the terminal.)'
+    sed -i "10s/FirstStart=true/FirstStart=false/" "$OwnDir/BashTool.sh"
+  else
+    sed -i "10s/FirstStart=true/FirstStart=false/" "$OwnDir/BashTool.sh"
+  fi
+fi
+if [[ -f "$File" ]]
+then
+  Done=true
+fi
+while [[ $Done == false ]]
+do
+  read -p 'Please specify the file you want to work with: ' File
+  if [[ -f "$File" ]]
+  then
+    Done=true
+  fi
+done
+echo "Editing: $File"

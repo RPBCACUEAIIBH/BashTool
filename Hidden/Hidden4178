@@ -1,0 +1,9 @@
+function LineCount
+{
+  LC=0
+  while read -r p
+  do
+    LC=$(( $LC + 1 ))
+  done < "$File"
+}
+
