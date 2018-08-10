@@ -17,17 +17,16 @@ while [[ $Answer != "exit" ]]
 do
   case $Answer # Messages that need to be displayed shold be here, with ":" (no operation) command in the bottom case statement...
   in
-               "" ) :
-                    ;;
-           "help" ) echo "help - Shows accepted options."
-                    echo "exit - Exits the interactive terminal."
-                    echo ""
-                    ;;
-                 *) echo "Error: $Answer is an unknown command!"
-                    Error=false
-                    ;;
+                 "" ) :
+                      ;;
+             "help" ) echo "help - Shows accepted options."
+                      echo "exit - Exits the interactive terminal."
+                      echo ""
+                      ;;
+                   *) echo "Error: $Answer is an unknown command!"
+                      Error=false
+                      ;;
   esac
   read -p 'Type "help" to list options. Waiting for orders: ' Answer
-  Status=$(cat ./Controls | grep Status | awk '{ print $2 }')
   clear
 done

@@ -1,0 +1,326 @@
+             "path" ) LineCount
+                      AtLine=$(echo $Answer | awk '{ print $2 }')
+                      if [[ $AtLine -gt 0 && $AtLine -le $LC ]]
+                      then
+                        if [[ ! -z $(echo $Answer | awk '{ print $3 }') && $(echo $Answer | awk '{ print $3 }') -gt 0 ]]
+                        then
+                          Indent=$(echo $Answer | awk '{ print $3 }')
+                        else
+                          Indent=0
+                        fi
+                        Disassemble
+                        DoIndent
+                        echo "Path=\"\${PathAndNameWExt%/*}\"" >> "$File"
+                        Reassemble
+                      fi
+                      ;;
+             "fnwe" ) LineCount
+                      AtLine=$(echo $Answer | awk '{ print $2 }')
+                      if [[ $AtLine -gt 0 && $AtLine -le $LC ]]
+                      then
+                        if [[ ! -z $(echo $Answer | awk '{ print $3 }') && $(echo $Answer | awk '{ print $3 }') -gt 0 ]]
+                        then
+                          Indent=$(echo $Answer | awk '{ print $3 }')
+                        else
+                          Indent=0
+                        fi
+                        Disassemble
+                        DoIndent
+                        echo "NameWExt=\"\${PathAndNameWExt##*/}\"" >> "$File"
+                        Reassemble
+                      fi
+                      ;;
+               "fn" ) LineCount
+                      AtLine=$(echo $Answer | awk '{ print $2 }')
+                      if [[ $AtLine -gt 0 && $AtLine -le $LC ]]
+                      then
+                        if [[ ! -z $(echo $Answer | awk '{ print $3 }') && $(echo $Answer | awk '{ print $3 }') -gt 0 ]]
+                        then
+                          Indent=$(echo $Answer | awk '{ print $3 }')
+                        else
+                          Indent=0
+                        fi
+                        Disassemble
+                        DoIndent
+                        echo "Name=\"\${NameWExt%.*}\"" >> "$File"
+                        Reassemble
+                      fi
+                      ;;
+              "ext" ) LineCount
+                      AtLine=$(echo $Answer | awk '{ print $2 }')
+                      if [[ $AtLine -gt 0 && $AtLine -le $LC ]]
+                      then
+                        if [[ ! -z $(echo $Answer | awk '{ print $3 }') && $(echo $Answer | awk '{ print $3 }') -gt 0 ]]
+                        then
+                          Indent=$(echo $Answer | awk '{ print $3 }')
+                        else
+                          Indent=0
+                        fi
+                        Disassemble
+                        DoIndent
+                        echo "Ext=\"\${NameWExt##*.}\"" >> "$File"
+                        Reassemble
+                      fi
+                      ;;
+             "lvar" ) LineCount
+                      AtLine=$(echo $Answer | awk '{ print $2 }')
+                      if [[ $AtLine -gt 0 && $AtLine -le $LC ]]
+                      then
+                        if [[ ! -z $(echo $Answer | awk '{ print $3 }') && $(echo $Answer | awk '{ print $3 }') -gt 0 ]]
+                        then
+                          Indent=$(echo $Answer | awk '{ print $3 }')
+                        else
+                          Indent=0
+                        fi
+                        Disassemble
+                        DoIndent
+                        echo -n "Var=\$(grep \"VarName\" \"\$File\" | awk " >> "$File"
+                        echo -n \' >> "$File"
+                        echo -n "{ print \$2 }" >> "$File"
+                        echo -n \' >> "$File"
+                        echo ")" >> "$File"
+                        Reassemble
+                      fi
+                      ;;
+             "svar" ) LineCount
+                      AtLine=$(echo $Answer | awk '{ print $2 }')
+                      if [[ $AtLine -gt 0 && $AtLine -le $LC ]]
+                      then
+                        if [[ ! -z $(echo $Answer | awk '{ print $3 }') && $(echo $Answer | awk '{ print $3 }') -gt 0 ]]
+                        then
+                          Indent=$(echo $Answer | awk '{ print $3 }')
+                        else
+                          Indent=0
+                        fi
+                        Disassemble
+                        DoIndent
+                        echo "sed -i \"s/\$(grep \"VarName\" \"\$File\")/VarName\\ \$Var/\" \"\$File\"" >> "$File"
+                        Reassemble
+                      fi
+                      ;;
+           "larray" ) LineCount
+                      AtLine=$(echo $Answer | awk '{ print $2 }')
+                      if [[ $AtLine -gt 0 && $AtLine -le $LC ]]
+                      then
+                        if [[ ! -z $(echo $Answer | awk '{ print $3 }') && $(echo $Answer | awk '{ print $3 }') -gt 0 ]]
+                        then
+                          Indent=$(echo $Answer | awk '{ print $3 }')
+                        else
+                          Indent=0
+                        fi
+                        Disassemble
+                        DoIndent
+                        echo "X=1" >> "$File"
+                        DoIndent
+                        echo "for i in \$(grep \"ArrayName\" \"\$File\")" >> "$File"
+                        DoIndent
+                        echo "do" >> "$File"
+                        DoIndent
+                        echo "  if [[ \$X -gt 1 ]]" >> "$File"
+                        DoIndent
+                        echo "  then" >> "$File"
+                        DoIndent
+                        echo "    Array[\$X]=\"\$i\" # Data starts from 2 in this array." >> "$File"
+                        DoIndent
+                        echo "    echo \"ArrayName[\$X]: \${Array[\$X]}\" # Debug" >> "$File"
+                        DoIndent
+                        echo "  fi" >> "$File"
+                        DoIndent
+                        echo "  X=\$(( \$X + 1 ))" >> "$File"
+                        DoIndent
+                        echo "done" >> "$File"
+                        Reassemble
+                      fi
+                      ;;
+           "sarray" ) LineCount
+                      AtLine=$(echo $Answer | awk '{ print $2 }')
+                      if [[ $AtLine -gt 0 && $AtLine -le $LC ]]
+                      then
+                        if [[ ! -z $(echo $Answer | awk '{ print $3 }') && $(echo $Answer | awk '{ print $3 }') -gt 0 ]]
+                        then
+                          Indent=$(echo $Answer | awk '{ print $3 }')
+                        else
+                          Indent=0
+                        fi
+                        Disassemble
+                        DoIndent
+                        echo "LineContent=\"ArrayName\"" >> "$File"
+                        DoIndent
+                        echo "PreviousContent=\"ArrayName\"" >> "$File"
+                        DoIndent
+                        echo "X=1" >> "$File"
+                        DoIndent
+                        echo "for i in \$(grep \"ArrayName\" \"\$File\")" >> "$File"
+                        DoIndent
+                        echo "do" >> "$File"
+                        DoIndent
+                        echo "  if [[ \$X -gt 1 ]]" >> "$File"
+                        DoIndent
+                        echo "  then" >> "$File"
+                        DoIndent
+                        echo "    PreviousContent=\"\$PreviousContent\\ \$i\"" >> "$File"
+                        DoIndent
+                        echo "    LineContent=\"\$LineContent \${Array[\$X]}\"" >> "$File"
+                        DoIndent
+                        echo "  fi" >> "$File"
+                        DoIndent
+                        echo "  X=\$(( \$X + 1 ))" >> "$File"
+                        DoIndent
+                        echo "done" >> "$File"
+                        DoIndent
+                        echo "sed -i \"s/\$PreviousContent/\$LineContent/\" \"\$File\"" >> "$File"
+                        Reassemble
+                      fi
+                      ;;
+           "ltable" ) LineCount
+                      AtLine=$(echo $Answer | awk '{ print $2 }')
+                      if [[ $AtLine -gt 0 && $AtLine -le $LC ]]
+                      then
+                        if [[ ! -z $(echo $Answer | awk '{ print $3 }') && $(echo $Answer | awk '{ print $3 }') -gt 0 ]]
+                        then
+                          Indent=$(echo $Answer | awk '{ print $3 }')
+                        else
+                          Indent=0
+                        fi
+                        Disassemble
+                        DoIndent
+                        echo -n "DynaVarNames=\$(cat \"\$File\" | awk " >> "$File"
+                        echo -n \' >> "$File"
+                        echo -n "{ print \$1 }" >> "$File"
+                        echo -n \' >> "$File"
+                        echo ")" >> "$File"
+                        DoIndent
+                        echo "for n in \$DynaVarNames" >> "$File"
+                        DoIndent
+                        echo "do" >> "$File"
+                        DoIndent
+                        echo "  X=1" >> "$File"
+                        DoIndent
+                        echo "  for i in \$(grep \"\$n\" \"\$File\")" >> "$File"
+                        DoIndent
+                        echo "  do" >> "$File"
+                        DoIndent
+                        echo "    if [[ \$X -gt 1 ]]" >> "$File"
+                        DoIndent
+                        echo "    then" >> "$File"
+                        DoIndent
+                        echo "      eval \$n[\$X]=\"\$i\" # Data starts from 2 in all these arrays." >> "$File"
+                        DoIndent
+                        echo "    fi" >> "$File"
+                        DoIndent
+                        echo "    X=\$(( \$X + 1 ))" >> "$File"
+                        DoIndent
+                        echo "  done" >> "$File"
+                        DoIndent
+                        echo "done" >> "$File"
+                        Reassemble
+                      fi
+                      ;;
+           "stable" ) LineCount
+                      AtLine=$(echo $Answer | awk '{ print $2 }')
+                      if [[ $AtLine -gt 0 && $AtLine -le $LC ]]
+                      then
+                        if [[ ! -z $(echo $Answer | awk '{ print $3 }') && $(echo $Answer | awk '{ print $3 }') -gt 0 ]]
+                        then
+                          Indent=$(echo $Answer | awk '{ print $3 }')
+                        else
+                          Indent=0
+                        fi
+                        Disassemble
+                        DoIndent
+                        echo "for n in \$DynaVarNames" >> "$File"
+                        DoIndent
+                        echo "do" >> "$File"
+                        DoIndent
+                        echo "  LineContent=\"\$n\"" >> "$File"
+                        DoIndent
+                        echo "  PreviousContent=\"\$n\"" >> "$File"
+                        DoIndent
+                        echo "  X=1" >> "$File"
+                        DoIndent
+                        echo "  for i in \$(grep \"\$n\" \"\$File\")" >> "$File"
+                        DoIndent
+                        echo "  do" >> "$File"
+                        DoIndent
+                        echo "    if [[ \$X -gt 1 ]]" >> "$File"
+                        DoIndent
+                        echo "    then" >> "$File"
+                        DoIndent
+                        echo "      PreviousContent=\"\$PreviousContent\\ \$i\"" >> "$File"
+                        DoIndent
+                        echo "      cmd=\"LineContent=\\\"\$LineContent \\\${\$n[\$X]}\\\"\"" >> "$File"
+                        DoIndent
+                        echo "      eval \$cmd" >> "$File"
+                        DoIndent
+                        echo "    fi" >> "$File"
+                        DoIndent
+                        echo "    X=\$(( \$X + 1 ))" >> "$File"
+                        DoIndent
+                        echo "  done" >> "$File"
+                        DoIndent
+                        echo "  sed -i \"s/\$PreviousContent/\$LineContent/\" \"\$File\"" >> "$File"
+                        DoIndent
+                        echo "done" >> "$File"
+                        Reassemble
+                      fi
+                      ;;
+           "dtable" ) LineCount
+                      AtLine=$(echo $Answer | awk '{ print $2 }')
+                      if [[ $AtLine -gt 0 && $AtLine -le $LC ]]
+                      then
+                        if [[ ! -z $(echo $Answer | awk '{ print $3 }') && $(echo $Answer | awk '{ print $3 }') -gt 0 ]]
+                        then
+                          Indent=$(echo $Answer | awk '{ print $3 }')
+                        else
+                          Indent=0
+                        fi
+                        Disassemble
+                        DoIndent
+                        echo "for n in \$DynaVarNames" >> "$File"
+                        DoIndent
+                        echo "do" >> "$File"
+                        DoIndent
+                        echo "  LineContent=\"\$n\"" >> "$File"
+                        DoIndent
+                        echo "  X=1" >> "$File"
+                        DoIndent
+                        echo "  for i in \$(grep \"\$n\" \"\$File\")" >> "$File"
+                        DoIndent
+                        echo "  do" >> "$File"
+                        DoIndent
+                        echo "    if [[ \$X -gt 1 ]]" >> "$File"
+                        DoIndent
+                        echo "    then" >> "$File"
+                        DoIndent
+                        echo "      cmd=\"LineContent=\\\"\$LineContent \\\${\$n[\$X]}\\\"\"" >> "$File"
+                        DoIndent
+                        echo "      eval \$cmd" >> "$File"
+                        DoIndent
+                        echo "    fi" >> "$File"
+                        DoIndent
+                        echo "    X=\$(( \$X + 1 ))" >> "$File"
+                        DoIndent
+                        echo "  done" >> "$File"
+                        DoIndent
+                        echo "  echo \"\$LineContent\"" >> "$File"
+                        DoIndent
+                        echo "done" >> "$File"
+                        Reassemble
+                      fi
+                      ;;
+          "dynavar" ) LineCount
+                      AtLine=$(echo $Answer | awk '{ print $2 }')
+                      if [[ $AtLine -gt 0 && $AtLine -le $LC ]]
+                      then
+                        if [[ ! -z $(echo $Answer | awk '{ print $3 }') && $(echo $Answer | awk '{ print $3 }') -gt 0 ]]
+                        then
+                          Indent=$(echo $Answer | awk '{ print $3 }')
+                        else
+                          Indent=0
+                        fi
+                        Disassemble
+                        DoIndent
+                        echo "eval \$n[\$X]=\$(( \$(eval \"echo \\\"\\\${\$n[\$X]}\\\"\") + 1 ))" >> "$File"
+                        Reassemble
+                      fi
+                      ;;

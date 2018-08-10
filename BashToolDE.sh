@@ -343,7 +343,7 @@ function UnhideLines
     touch "${File}Temp"
     while [[ $LN -le $LC ]]
     do
-      if [[ ! -z $(sed "${LN}q;d" "$File" | grep "line(s) hiddebn by BashTool! Marker:") ]]
+      if [[ ! -z $(sed "${LN}q;d" "$File" | grep "line(s) hiddebn by BashToolDE! Marker:") ]]
       then
         ThisMarker=$(sed "${LN}q;d" "$File" | awk '{ print $8 }')
         if [[ $ThisMarker -eq $Marker ]]
