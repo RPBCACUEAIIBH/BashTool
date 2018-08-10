@@ -7,8 +7,8 @@ OwnDir="$(pwd)"
 cd "$PWDir"
 
 # Variables
-FirstStart=true # Keep this in line 10
-Version="1.1"
+FirstStart=false # Keep this in line 10
+Version="1.1.1"
 File="$@"
 Answer=""
 Done=false
@@ -391,6 +391,10 @@ do
     Done=true
   fi
 done
+if [[ "${File%/*}" == "." || "$File" == "${File%/*}" ]]
+then
+  File="$PWDir/${File##*/}"
+fi
 echo "Editing: $File"
 while [[ $Answer != "exit" ]]
 do
