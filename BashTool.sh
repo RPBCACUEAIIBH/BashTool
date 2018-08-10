@@ -7,7 +7,7 @@ OwnDir="$(pwd)"
 cd "$PWDir"
 
 # Variables
-FirstStart=false # Keep this in line 10
+FirstStart=true # Keep this in line 10
 Version="1.1.1"
 File="$@"
 Answer=""
