@@ -1,5 +1,5 @@
 BashTool
-Version 1.0
+Version 1.1
 
 Interactive script for adding IDE functionality to gedit or any other text editor capable of recognizin changed content and asking to reload... Only for bash scripts...
 
@@ -29,3 +29,8 @@ Some things to note:
 - You can work on multiple projects, it will store all parts in the hidden folder within it's own directory, however the parts are uniquely numbered, and the markers are in your scripts where the parts came from thus it will always assemble them correctly. Theoretically it should be able to handle up to 99999 hidden parts...
 - Never delete the long comments containing marker numbers... I's a random number not necessarily in order, if you delete one, you may find yourself analising the entire stack of hidden parts to find the one you need. That's not fun...
 - You can have multiple levels of hiding(I mean hiding markers of hidden parts.), there is no limit to that. The unhide command with no markers specified is recursive so it will theoretically unhide everything in the correct order, however it may take longger, as it has to go trough the file several times line by line till there are no parts left hidden.
+
+What's new:
+Version 1.1
+  - Some aesthetic fixes ware made...
+  - MultiThreaded template added.
