@@ -391,6 +391,10 @@ do
     Done=true
   fi
 done
+if [[ "${File%/*}" == "." || "$File" == "${File%/*}" ]]
+then
+  File="$PWDir/${File##*/}"
+fi
 echo "Editing: $File"
 while [[ $Answer != "exit" ]]
 do

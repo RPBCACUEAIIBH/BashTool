@@ -11,8 +11,7 @@
 # 55 line(s) hiddebn by BashToolDE! Marker: 8084 Your notes: Insertion functions
 # 281 line(s) hiddebn by BashToolDE! Marker: 565 Your notes: Editing functions
 
-# Execution
-# 27 line(s) hiddebn by BashToolDE! Marker: 24844 Your notes: Initializaton
+# 32 line(s) hiddebn by BashToolDE! Marker: 22714 Your notes: Initialization
 while [[ $Answer != "exit" ]]
 do
   case $(echo $Answer | awk '{ print $1 }')
