@@ -1,5 +1,5 @@
 BashTool
-Version 1.1.2
+Version 1.2
 
 Interactive script for adding IDE functionality to gedit or any other text editor capable of recognizin changed content and asking to reload... Only for bash scripts...
 
@@ -9,7 +9,7 @@ Features:
 - Adding function
 - Hiding/unhiding/commenting/uncommenting/indenting lines
 - Quick list of insertable useful command structures
-- Bash script templates
+- Bash script templates for simple/interactive/multi threaded scipts.
 
 Operation:
 - Create an empty file
@@ -31,6 +31,9 @@ Some things to note:
 - You can have multiple levels of hiding(I mean hiding markers of hidden parts.), there is no limit to that. The unhide command with no markers specified is recursive so it will theoretically unhide everything in the correct order, however it may take longger, as it has to go trough the file several times line by line till there are no parts left hidden.
 
 What's new:
+Version 1.2
+  - Modified hiding/unhiding to store hidden lines locally beside the edited file. (Make sure to unhide currently hidden files before upgrading to this version!)
+
 Version 1.1.2
   - Added message function, help and silent silent mode to MultiThreaded template.
   - Control.sh now also exits when stop command is given.

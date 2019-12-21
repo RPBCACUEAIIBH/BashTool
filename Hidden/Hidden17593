@@ -1,4 +1,3 @@
-# Execution
 if [[ $FirstStart == true && -z $(grep "bashtool" ~/.bashrc) ]]
 then
   read -p 'Wold you like BashTool to set an alias for itself? (y/n): ' Yy
@@ -29,4 +28,9 @@ if [[ "${File%/*}" == "." || "$File" == "${File%/*}" ]]
 then
   File="$PWDir/${File##*/}"
 fi
+Path="${File%/*}"
 echo "Editing: $File"
+while [[ $Answer != "exit" ]]
+do
+  case $(echo $Answer | awk '{ print $1 }')
+  in

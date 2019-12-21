@@ -3,7 +3,6 @@
             "INTER" ) cp -af "$OwnDir/Templates/Interactive.sh" "$File"
                       ;;
               "MTT" ) cp -af "$OwnDir/Templates/MultiT/MultiThreaded.sh" "$File"
-                      Path="${File%/*}"
                       cp -af "$OwnDir/Templates/MultiT/Control.sh" "$Path/Control.sh"
                       cp -af "$OwnDir/Templates/MultiT/MTConfig.conf" "$Path/MTConfig.conf"
                       touch "$Path/Results"
