@@ -19,12 +19,41 @@ ThreadLimit=""
 BatchSize=""
 
 ### Functions ###
+function Message # $2 => "message"; $2 => E/W/I (Message Level: Error/Warning/Info); $3 => L (Optional flag: Add message to logfile)
+{
+  Level=""
+  case $2
+  in
+                 [Ee]* ) Level="Error:"
+                      ;;
+                 [Ww]* ) Level="Warning:"
+                      ;;
+                   *) Level="Info:"
+                      ;;
+  esac
+  if [[ $Output == "Silent" ]]
+  then
+    if [[ $3 == [Ll]* ]]
+    then
+      echo "$(date -Iseconds) $Level $1" >> "$LogFile"
+    fi
+  else
+    if [[ $3 == [Ll]* ]]
+    then
+      echo "$(date -Iseconds) $Level $1" | tee -a "$LogFile"
+    else
+      echo "$(date -Iseconds) $Level $1"
+    fi
+  fi
+}
+
+
 function Listen # Listening to user input
 {
   # This function is called by the Main process loads variables for the Main process only...
   if [[ ! -f $ConfigFile ]]
   then
-    echo "$(date -Iseconds) Error: $ConfigFile file does not exist... Aborting!" | tee -a "$LogFile"
+    Message "$ConfigFile file does not exist... Aborting!" E L
     exit
   else
     Order=$(grep "Order" "$ConfigFile" | awk '{ print $2 }')
@@ -34,7 +63,7 @@ function Listen # Listening to user input
   if [[ $ThreadLimit -gt $ThreadCount ]]
   then
     ThreadNumber=$ThreadCount
-    echo "$(date -Iseconds) Warning: Thread limit ignored! Your CPU only has $ThreadCount threads!" | tee -a $LogFile
+    Message "Thread limit ignored! Your CPU only has $ThreadCount threads!" W L
   else
     ThreadNumber=$ThreadLimit
   fi
@@ -99,7 +128,7 @@ function Thread # $1 - Number of thread
         DeepSleep[$1]=$(( ${DeepSleep[$1]} + 1 ))
         sleep $(grep "FeedFrequency" "$ConfigFile" | awk '{ print $2 }')
       else
-        echo "$(date -Iseconds) Thread$1 is sleeping..." | tee -a "$LogFile"
+        Message "Thread$1 is sleeping..." I L
         sleep $(grep "SleepFor" "$ConfigFile" | awk '{ print $2 }')
       fi
     fi
@@ -108,36 +137,64 @@ function Thread # $1 - Number of thread
 }
 
 ### Initialization ###
+Output=""
+while [[ ! -z $@ ]]
+do
+  case $1
+  in
+           "--help" ) echo "--silent            Only outputs to the log file."
+                      echo "--help              Shows this help."
+                      echo ""
+                      echo ""
+                      exit
+                      ;;
+         "--silent" ) Output="Silent"
+                      ;;
+                   *) echo "Error: Unknown option $1!"
+                      exit
+                      ;;
+  esac
+  shift
+done
+
 # Creating or clearing $LogFile
 if [[ ! -f "$LogFile" ]]
 then
   touch "$LogFile"
-  echo "$(date -Iseconds) Beggining log" | tee "$LogFile"
-else
-  echo "$(date -Iseconds) Beggining log" | tee "$LogFile"
 fi
+echo -n "" > "$LogFile"
+Message "Beggining log" I L
 # Root check
 Permission=false
-echo "$(date -Iseconds) Running as: $(whoami)" | tee -a "$LogFile"
+Message "Running as: $(whoami)" I L
 if [[ $(whoami) == "root" ]]
 then
-  echo "$(date -Iseconds) Setting higher process priority for improved efficiency!" | tee -a "$LogFile"
+  Message "Setting higher process priority for improved efficiency!" I L
   renice -10 -p $BASHPID
   Permission=true
 else
-  echo "$(date -Iseconds) Warning: Setting higher process priority requires root permissions! This may affect efficiency!" | tee -a "$LogFile"
+  Message "Setting higher process priority requires root permissions! This may affect efficiency!" W L
 fi
 # Loading variables
 X=$(lscpu | grep 'CPU(s):' | awk '{ print $2 }')
 ThreadCount=$(echo $X | awk '{ print $1 }')
-echo "$(date -Iseconds) $ThreadCount Thread(s) detected." | tee -a "$LogFile"
-Listen
-echo "$(date -Iseconds) Order: $Order" | tee -a "$LogFile"
-echo "$(date -Iseconds) Thread limit: $ThreadLimit" | tee -a "$LogFile"
-echo "$(date -Iseconds) Feed frequency: $(grep "FeedFrequency" "$ConfigFile" | awk '{ print $2 }')" | tee -a "$LogFile"
-echo "$(date -Iseconds) Batch size: $BatchSize" | tee -a "$LogFile"
-echo "$(date -Iseconds) Sleeping after: $(grep "SleepAfter" "$ConfigFile" | awk '{ print $2 }')" | tee -a "$LogFile"
-echo "$(date -Iseconds) Sleeping for: $(grep "SleepFor" "$ConfigFile" | awk '{ print $2 }')" | tee -a "$LogFile"
+if [[ $Permission == true ]]
+then
+  AMem=$(cat "/proc/meminfo" | grep "MemAvailable" | awk '{ print $2 }')
+else
+  AMem=$(df | grep "/run/user/$(id -u $USER)" | awk '{ print $4 }')
+fi
+MSize=$(( $(grep "MSize" $ConfigFile | awk '{ print $2 }') * 1024 )) # The available memory is in KiB, MSize should also be in KiB (This can't change on the fly...)
+Message "Thread(s) detected: $ThreadCount" I L
+Message "Available memory: $(( $AMem / 1024 )) MiB" I L
+Message "Assigned memory: $(( $MSize / 1024 )) MiB" I L
+Listen # Initialization of values from config file...
+Message "Initial Order: $Order" I L
+Message "Thread limit: $ThreadLimit" I L
+Message "Feed frequency: $(grep "FeedFrequency" "$ConfigFile" | awk '{ print $2 }')" I L
+Message "Batch size: $BatchSize" I L
+Message "Sleeping after: $(grep "SleepAfter" "$ConfigFile" | awk '{ print $2 }')" I L
+Message "Sleeping for: $(grep "SleepFor" "$ConfigFile" | awk '{ print $2 }')" I L
 # WDir
 if [[ $Permission == true ]]
 then
@@ -162,43 +219,40 @@ then
   fi
   rm -Rf "$Wdir"
 fi
-echo "$(date -Iseconds) Preparing WDir! ($WDir)" | tee -a "$LogFile"
+Message "Preparing WDir! ($WDir)" I L
 mkdir "$WDir"
 if [[ ! -d "$WDir" ]]
 then
-  echo "$(date -Iseconds) Error: Work direcotry couldn not be created at $WDir Aborting!" | tee -a "$LogFile"
+  Message "Work direcotry couldn not be created at $WDir Aborting!" E L
   exit
 else
-  MSize=$(( $(grep "MSize" $ConfigFile | awk '{ print $2 }') * 1024 )) # The available memory is in KiB, MSize should also be in KiB
   if [[ $Permission == true ]]
   then
-    AMem=$(cat "/proc/meminfo" | grep "MemAvailable" | awk '{ print $2 }')
     if [[ $AMem -gt $MSize ]]
     then
-      echo "$(date -Iseconds) Mounting $(( $MSize / 1024 )) MiB RAM to $WDir" | tee -a "$LogFile"
+      Message "Mounting $(( $MSize / 1024 )) MiB RAM to $WDir" I L
       mount -t tmpfs -o rw,noatime,nodiratime,size=$(( $MSize * 1024 )) tmpfs "$WDir"
     else
       # You may want aborting execution by default without asking in case there is not enough memory...
-      echo "$(date -Iseconds) !!! Warning !!! Not enough available memory! Should the script try running with available memory?" >> "$LogFile"
-      read -t 15 -p "There is only $(( $AMem / 1024 )) MiB available memory. The config file specifies: $(( $MSize / 1024 )) MiB. Should the script try running with the available memory? (Running out of memory can cause malfunction, or slow operation in case you have some swap space. y/n)" Yy
-      echo "$(date -Iseconds) Response: $Yy" >> "$LogFile"
+      Message "Not enough available memory! Should the script try running with available memory?" W L
+      read -t 15 -p "There is only $(( $AMem / 1024 )) MiB available memory. The config file specifies: $(( $MSize / 1024 )) MiB. Should the script try running with the available memory? (Running out of memory can cause malfunction, crash or slow operation in case you have swap space. y/n)" Yy
+      Message "Response: $Yy" I L
       if [[ $Yy != [Yy]* ]]
       then
-        echo "$(date -Iseconds) Aborting..." | tee -a "$LogFile"
+        Message "Aborting..." I L
         rm -Rf $WDir
         exit
       else
         MSize=$(cat "/proc/meminfo" | grep "MemAvailable" | awk '{ print $2 }')
-        echo "$(date -Iseconds) Mounting $(( $MSize / 1024 )) MiB RAM to $WDir" | tee -a "$LogFile"
+        Message "Mounting $(( $MSize / 1024 )) MiB RAM to $WDir" I L
         mount -t tmpfs -o rw,noatime,nodiratime,size=$(( $MSize * 1024 )) tmpfs "$WDir"
       fi
     fi
   else
     AMem=$(df | grep "/run/user/$(id -u $USER)" | awk '{ print $4 }')
-    echo "$(date -Iseconds) $(( $AMem /1024 )) MiB memory available to work with." | tee -a "$LogFile"
     if [[ $AMem -lt $MSize ]]
     then
-      echo "$(date -Iseconds) Error: Insufficient memory! Aborting... (You may get different result by running this script as root.)" | tee -a "$LogFile"
+      Message "Insufficient memory at /run! Try running as root, that may solve the problem! Aborting... (Usually only 10% memory is mounted to /run directory by the system, which is accessible to the user. The script can mount a different amount to it's work dir, but only if runs as root.)" E L
       rm -Rf $WDir
       exit
     fi
@@ -212,16 +266,15 @@ fi
 # Preparing threads
 for Thread in $(seq $ThreadCount) # Maximum number of threads must be created even if the limit is lower for the flexibility of activating/deactivating them later
 do
-  echo "$(date -Iseconds) Creating Thread $Thread!" | tee -a "$LogFile"
+  Message "Creating Thread $Thread!" I L
   touch "$WDir/Thread$Thread"
   echo "State: I" >> "$WDir/Thread$Thread"
   DeepSleep[$Thread]=0
   Thread $Thread& # These threads should not be closed, they sleep until they are fed data and their status is set to R. They will exit with the main process.
 done
 ### Execution ###
-echo "$(date -Iseconds) Done preparing" >> "$LogFile"
 T1=$(date -Ins)
-echo "$(date -Iseconds) Started crunching at: $T1" >> "$LogFile"
+Message "Done preparing at: $T1" I L
 # Here's the place for initial operations.
 
 if [[ ! -f "$WDir/Results" ]]
@@ -234,7 +287,7 @@ while [[ $Order != "Stop" ]]
 do
   if [[ $Order == "Run" && ${DeepSleep[0]} -ge $(grep "SleepAfter" "$ConfigFile" | awk '{ print $2 }') ]]
   then
-    echo "$(date -Iseconds) Main process active!" | tee -a "$LogFile"
+    Message "Main process active!" I L
   fi
   for Thread in $(seq $ThreadNumber)
   do
@@ -245,7 +298,7 @@ do
       if [[ ${DeepSleep[$Thread]} -ge $(grep "SleepAfter" "$ConfigFile" | awk '{ print $2 }') ]] # If it has been paused it must wake the threads
       then
         DeepSleep[$Thread]=0
-        echo "$(date -Iseconds) Waking Thread$Thread..." | tee -a "$LogFile"
+        Message "Waking Thread$Thread..." I L
       fi
     fi
   done
@@ -259,14 +312,14 @@ do
     DeepSleep[0]=$(( ${DeepSleep[0]} + 1 ))
     sleep $(grep "FeedFrequency" "$ConfigFile" | awk '{ print $2 }')
   else
-    echo "$(date -Iseconds) Main process is sleeping..." | tee -a "$LogFile"
+    Message "Main process is sleeping..." I L
     sleep $(grep "SleepFor" "$ConfigFile" | awk '{ print $2 }')
   fi
   Listen
 done
 # Waiting for all threads to finish
 Wait=true
-echo "$(date -Iseconds) Waiting for threads to finish their job." | tee -a "$LogFile"
+Message "Waiting for threads to finish their job." I L
 while [[ $Wait == true ]]
 do
   Wait=false
@@ -285,10 +338,10 @@ do
       else
         if [[ $(grep "State" "$WDir/Thread$Thread" | awk '{ print $2 }') != "Offline" ]]
         then
-          echo "$(date -Iseconds) Waiting for Thread$Thread to stop!" | tee -a "$LogFile"
+          Message "Waiting for Thread$Thread to stop!" I L
           Wait=true
         else
-          echo "$(date -Iseconds) Thread$Thread is offline!" | tee -a "$LogFile"
+          Message "Thread$Thread is offline!" I L
         fi
       fi
     fi
@@ -298,7 +351,7 @@ done
 
 ### Finishing ###
 T2=$(date -Ins)
-echo "$(date -Iseconds) Finished crunching!" >> "$LogFile"
+Message "Main process exiting!" I L
 # Here you can calculate runtime, summary of what's done, maybe percentage if the operation was not entirely finished, etc.
 cp "$LogFile" "$OwnDir/LastRun.log"
 echo "Offline" > "$OwnDir/Feedback"
