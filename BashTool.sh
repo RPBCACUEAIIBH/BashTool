@@ -8,7 +8,7 @@ cd "$PWDir"
 
 # Variables
 FirstStart=true # Keep this in line 10
-Version="1.1.2"
+Version="1.2"
 File="$@"
 Answer=""
 Done=false
@@ -69,11 +69,11 @@ function CountDM
   X=true
   for i in $(grep "line(s) hiddebn by BashTool! Marker:" "$File" | awk '{ print $8 }' )
   do
-    for n in $(grep "# Debug" "$OwnDir/Hidden/Hidden$i" | awk '{ print $1 }')
+    for n in $(grep "# Debug" "$Path/.HiddenLines/Hidden$i" | awk '{ print $1 }')
     do
       DebugNum=$(( $DebugNum + 1 ))
     done
-    if [[ ! -z $(grep "line(s) hiddebn by BashTool! Marker:" "$OwnDir/Hidden/Hidden$i") && $X == true ]]
+    if [[ ! -z $(grep "line(s) hiddebn by BashTool! Marker:" "$Path/.HiddenLines/Hidden$i") && $X == true ]]
     then
       echo "Warning: BashTool detected more then 1 level of hidden lines. Debug messages are only counted 1 level deep. Keep in mind that you may have debug message with this numer in more then 1 location in your code!"
       X=false
@@ -272,20 +272,24 @@ function DoIndent
 
 function HideLines
 {
+  if [[ ! -d "$Path/.HiddenLines" ]]
+  then
+    mkdir "$Path/.HiddenLines"
+  fi
   RandomSelection=true
   while [[ $RandomSelection == true ]]
   do
     RandomNumber=$RANDOM
-    if [[ ! -e "$OwnDir/Hidden/Hidden$RandomNumber" ]]
+    if [[ ! -e "$Path/.HiddenLines/Hidden$RandomNumber" ]]
     then
       RandomSelection=false
     fi
   done
-  touch "$OwnDir/Hidden/Hidden$RandomNumber"
+  touch "$Path/.HiddenLines/Hidden$RandomNumber"
   LN=$FromLine
   while [[ $LN -le $ToLine ]]
   do
-    sed "${LN}q;d" "$File" >> "$OwnDir/Hidden/Hidden$RandomNumber"
+    sed "${LN}q;d" "$File" >> "$Path/.HiddenLines/Hidden$RandomNumber"
     LN=$(( $LN + 1 ))
   done
   LineCount
@@ -324,10 +328,10 @@ function UnhideLines
         if [[ ! -z $(sed "${LN}q;d" "$File" | grep "line(s) hiddebn by BashTool! Marker:") ]]
         then
           ThisMarker=$(sed "${LN}q;d" "$File" | awk '{ print $8 }')
-          cat "$OwnDir/Hidden/Hidden$ThisMarker" >> "${File}Temp"
+          cat "$Path/.HiddenLines/Hidden$ThisMarker" >> "${File}Temp"
           if [[ $KeepFlag == false ]]
           then
-            rm "$OwnDir/Hidden/Hidden$ThisMarker"
+            rm "$Path/.HiddenLines/Hidden$ThisMarker"
           fi
         else
           sed "${LN}q;d" "$File" >> "${File}Temp"
@@ -348,8 +352,8 @@ function UnhideLines
         ThisMarker=$(sed "${LN}q;d" "$File" | awk '{ print $8 }')
         if [[ $ThisMarker -eq $Marker ]]
         then
-          cat "$OwnDir/Hidden/Hidden$ThisMarker" >> "${File}Temp"
-          rm "$OwnDir/Hidden/Hidden$ThisMarker"
+          cat "$Path/.HiddenLines/Hidden$ThisMarker" >> "${File}Temp"
+          rm "$Path/.HiddenLines/Hidden$ThisMarker"
         else
           sed "${LN}q;d" "$File" >> "${File}Temp"
         fi
@@ -362,6 +366,10 @@ function UnhideLines
     rm "${File}Temp"
   fi
   Marker=""
+  if [[ -z $(ls "$Path/.HiddenLines") ]]
+  then
+    rmdir "$Path/.HiddenLines"
+  fi
 }
 
 # Execution
@@ -395,6 +403,7 @@ if [[ "${File%/*}" == "." || "$File" == "${File%/*}" ]]
 then
   File="$PWDir/${File##*/}"
 fi
+Path="${File%/*}"
 echo "Editing: $File"
 while [[ $Answer != "exit" ]]
 do
@@ -1093,7 +1102,6 @@ do
             "INTER" ) cp -af "$OwnDir/Templates/Interactive.sh" "$File"
                       ;;
               "MTT" ) cp -af "$OwnDir/Templates/MultiT/MultiThreaded.sh" "$File"
-                      Path="${File%/*}"
                       cp -af "$OwnDir/Templates/MultiT/Control.sh" "$Path/Control.sh"
                       cp -af "$OwnDir/Templates/MultiT/MTConfig.conf" "$Path/MTConfig.conf"
                       touch "$Path/Results"
