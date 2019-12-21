@@ -8,7 +8,7 @@ cd "$PWDir"
 
 # Variables
 FirstStart=true # Keep this in line 10
-Version="1.1.1"
+Version="1.1.2"
 File="$@"
 Answer=""
 Done=false

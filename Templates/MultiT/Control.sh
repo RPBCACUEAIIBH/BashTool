@@ -37,6 +37,7 @@ do
                       ;;
              "stop" ) Var="Order: $(grep "Order" "$ConfigFile" | awk '{ print $2 }')"
                       sed -i "s/$Var/Order:\ Stop/" "$ConfigFile"
+                      exit
                       ;;
       "ThreadLimit" ) AdvOption
                       ;;
@@ -53,11 +54,11 @@ do
                  "" ) :
                       ;;
              "help" ) echo "Basic Options:"
-                      echo "-> Run - Commands the script to run."
-                      echo "-> Pause - Commands the script to pause."
-                      echo "-> Stop - Commands the script to stop."
+                      echo "-> run - Commands the script to run."
+                      echo "-> pause - Commands the script to pause."
+                      echo "-> exit - Exits the interactive terminal without stopping the other script."
+                      echo "-> stop - Commands the script to stop and exits the interactive terminal."
                       echo "-> help - Shows this list."
-                      echo "-> exit - Exits the interactive terminal."
                       echo ""
                       echo "Advanced Options:"
                       echo "-> ThreadLimit [value] - Load limiting...(positive integer, adjustable on the fly)(Bash doesn't do multi threading as other languages, this script creates parallel tasks, one for each detected cpu core, but those tasks are not assigned to a specific core, so system monitor or htop may say that all CPU cores are working but at a lower percentage when you limit the number of cores instead of showing 1 less core in action, but the script actually gives job only to the specified number of \"threads\", so load limiting works anyway.)"
@@ -72,7 +73,7 @@ do
                       Error=false
                       ;;
   esac
-  read -p 'Type "run", "pause", "stop" or "help". Waiting for orders: ' Answer
+  read -p 'Type "run", "pause", "exit" or "help". Waiting for orders: ' Answer
   ConfigFile=$(cat $OwnDir/Feedback)
   if [[ $ConfigFile == "Offline" ]]
   then
